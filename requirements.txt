@@ -1,0 +1,44 @@
+# ── Web framework ────────────────────────────────────────────────────────────
+fastapi==0.115.0
+uvicorn[standard]==0.34.0        # ASGI server; [standard] adds websocket + reload
+python-multipart==0.0.20         # required for FastAPI file uploads (UploadFile)
+sse-starlette==2.3.6             # Server-Sent Events helper for FastAPI
+
+# ── Pydantic (v2 required) ───────────────────────────────────────────────────
+pydantic==2.11.7
+pydantic-settings==2.7.1         # BaseSettings reads from .env files
+
+# ── LangChain / LangGraph ecosystem ──────────────────────────────────────────
+# All four packages must stay in the same 0.3.x series so they share the same
+# langchain-core version (0.3.x).  langchain-groq 1.x requires langchain-core
+# 1.x which conflicts with langchain/langchain-community 0.3.x, so we stay on
+# langchain-groq 0.3.x.  langgraph 1.x also requires langchain-core 1.x, so
+# we use langgraph 0.3.x.  All APIs we use (StateGraph, START, END,
+# with_structured_output, ChatGroq) are identical across these versions.
+langchain==0.3.25
+langchain-community==0.3.24      # PyPDFLoader, Docx2txtLoader live here
+langchain-groq==0.3.8            # ChatGroq — compatible with langchain-core 0.3.x
+langgraph==0.3.34                # StateGraph, interrupt (Phase 3) — 0.3.x series
+
+# Document loaders used in parse_document node
+pypdf==5.6.0                     # PDF text extraction (PyPDFLoader uses this)
+docx2txt==0.8                    # DOCX text extraction (Docx2txtLoader uses this)
+
+# ── Embeddings (local, no extra API key needed) ──────────────────────────────
+sentence-transformers==3.4.1
+# torch: intentionally unpinned — pip resolves the correct CPU wheel.
+# Python 3.13 requires torch>=2.6.0.
+torch>=2.6.0
+
+# ── Database ─────────────────────────────────────────────────────────────────
+sqlalchemy==2.0.41
+asyncpg==0.30.0                  # async PostgreSQL driver for SQLAlchemy
+pgvector==0.3.6                  # SQLAlchemy column type for pgvector vectors
+alembic==1.15.2                  # DB migrations (Phase 4 setup)
+
+# ── Utilities ────────────────────────────────────────────────────────────────
+groq>=0.11.0                     # Groq official SDK for Whisper voice-to-text
+python-dotenv==1.1.1
+tenacity==9.1.2
+python-jose[cryptography]==3.3.0 # JWT (reserved for future auth)
+httpx==0.28.1                    # async HTTP client

@@ -1,0 +1,35 @@
+COMPLAINT REFERENCE: CMP-2024-0441
+SOURCE: Regulatory Authority Portal Submission
+DATE RECEIVED: 05 June 2024
+
+COMPLAINANT: National Medicines Regulatory Authority (NMRA)
+CONTACT: Inspector R. Okonkwo, Post-Market Surveillance Division
+
+PRODUCT INFORMATION:
+  Product Name    : Atorvastatin Calcium Tablets
+  Strength        : 40 mg
+  Batch / Lot No. : AT-2024-0441-B
+  Manufacturing   : 01 March 2024
+  Expiry Date     : 28 February 2027
+  Quantity        : 5,000 tablets (entire batch distributed to 12 retail outlets)
+
+NATURE OF COMPLAINT (Labeling):
+During a routine post-market inspection, NMRA field officers identified that
+the patient information leaflet (PIL) included in Batch AT-2024-0441-B contains
+an incorrect dosage instruction. The PIL states "Take one tablet TWICE daily"
+whereas the approved product monograph specifies "Take one tablet ONCE daily."
+
+This labeling discrepancy poses a significant risk of patient overdose if
+patients follow the PIL rather than the prescriber's instruction.
+
+REGULATORY CONTEXT:
+This constitutes a potential Class II labeling recall trigger under local
+medicines regulations. The manufacturer is required to respond within 5 working
+days with a corrective action plan and evidence of print-batch reconciliation.
+
+INITIAL ASSESSMENT BY NMRA:
+  Severity : Critical (direct patient safety risk — overdose potential)
+  Priority : High
+
+COMPLAINT SOURCE: Regulatory
+COMPLAINT DATE: 05 June 2024

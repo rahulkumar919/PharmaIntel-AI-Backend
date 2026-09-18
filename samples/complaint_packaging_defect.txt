@@ -1,0 +1,39 @@
+Date: 15 March 2024
+
+To: Quality Assurance Department
+From: MedSupply Europe GmbH, Berlin, Germany
+Re: Customer Complaint – Packaging Defect
+
+Dear QA Team,
+
+We are writing to formally raise a quality complaint regarding a recent shipment
+of Amoxicillin Trihydrate 500 mg Capsules (USP Grade) received at our Frankfurt
+distribution centre on 12 March 2024.
+
+Upon routine incoming goods inspection, our warehouse team identified that
+approximately 50 capsules out of a total received quantity of 1,000 units
+exhibited visibly broken induction seals on the HDPE bottle closures. The seals
+appeared to have never been properly activated rather than tampered with.
+
+Product Details:
+  Product Name   : Amoxicillin Trihydrate Capsules
+  Strength/Grade : 500 mg / USP
+  Batch/Lot No.  : BX-20240315-002
+  Mfg. Date      : 15 January 2024
+  Expiry Date    : 14 January 2026
+  Qty Affected   : 50 units (out of 1,000 units received)
+
+We have quarantined the affected units pending your investigation. The remaining
+950 units have been placed on hold and will not be released to market until we
+receive your CAPA plan.
+
+Given the potential patient safety implications of compromised packaging, we
+request that this matter be treated with HIGH priority and that we receive an
+initial acknowledgement within 24 hours.
+
+Complaint Source: Email
+Complaint Date: 15 March 2024
+
+Regards,
+Hans Weber
+QA Manager, MedSupply Europe GmbH

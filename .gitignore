@@ -25,8 +25,12 @@ env/
 Thumbs.db
 
 # Test artefacts produced during development
-*.txt
+*_out.txt
+*_out*.txt
+*_err.txt
+feature_*.txt
 *.log
+!requirements.txt
 
 # sentence-transformers model cache (~80 MB download on first run)
 .cache/
