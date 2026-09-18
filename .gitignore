@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.Python
+*.egg-info/
+
+# Virtual environments — never commit these
+.venv/
+venv/
+env/
+
+# Secrets — commit .env.example, NEVER .env
+.env
+.env.local
+.env.*.local
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Test artefacts produced during development
+*.txt
+*.log
+
+# sentence-transformers model cache (~80 MB download on first run)
+.cache/
