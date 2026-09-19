@@ -10,6 +10,8 @@ Why Pydantic BaseSettings?
 """
 
 from functools import lru_cache
+from typing import Any, Union
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -46,16 +48,36 @@ class Settings(BaseSettings):
 
     # ── API / server ──────────────────────────────────────────────────────────
     app_env: str = "development"
-    # Pydantic-settings parses a JSON array string for list fields when read
-    # from env vars.  Format in .env: CORS_ORIGINS='["http://localhost:5173"]'
-    # Or use a simple comma-separated string with a custom validator (below).
-    cors_origins: list[str] = ["http://localhost:5173", "http://localhost:3000"]
+    # Allowed origins for CORS. Supports comma-separated strings or JSON arrays in env.
+    cors_origins: Union[list[str], str] = [
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://pharma-intel-ai-one.vercel.app",
+    ]
+
+    @field_validator("cors_origins", mode="after")
+    @classmethod
+    def assemble_cors_origins(cls, v: Any) -> list[str]:
+        if isinstance(v, str):
+            v = v.strip()
+            if not v:
+                return []
+            if v.startswith("[") and v.endswith("]"):
+                import json
+                try:
+                    parsed = json.loads(v)
+                    if isinstance(parsed, list):
+                        return [str(i).strip() for i in parsed if str(i).strip()]
+                except Exception:
+                    pass
+            return [i.strip() for i in v.split(",") if i.strip()]
+        if isinstance(v, (list, tuple, set)):
+            return [str(i).strip() for i in v if str(i).strip()]
+        return list(v)
 
     model_config = SettingsConfigDict(
         env_file=".env",
         extra="ignore",
-        # Allow comma-separated strings for list fields, e.g.:
-        # CORS_ORIGINS=http://localhost:5173,http://localhost:3000
         env_parse_none_str="null",
     )
 
