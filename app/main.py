@@ -49,20 +49,27 @@ async def lifespan(app: FastAPI):
     logger.info("Extraction model : %s", settings.extraction_model)
     logger.info("CAPA model       : %s", settings.capa_model)
 
-    # Warm up embedding model in a thread so we don't block the event loop
-    # during the synchronous model load.
-    logger.info("Warming up sentence-transformers embedding model…")
-    loop = asyncio.get_event_loop()
-    try:
-        from app.graph.embedder import _get_model
-        await loop.run_in_executor(None, _get_model)
-        logger.info("Embedding model ready.")
-    except Exception as exc:
-        # Non-fatal — the app still starts, duplicate detection degrades gracefully
-        logger.warning("Embedding model warm-up failed: %s", exc)
+    # Warm up embedding model in the background so port binding happens immediately.
+    # On cloud platforms like Render, Uvicorn must complete lifespan startup and
+    # open the port within the platform's port scan timeout (~4 mins). Blocking on
+    # downloading or loading the 80MB+ model weights delays port binding and causes
+    # "Port scan timeout reached, no open ports detected".
+    async def _warmup_embedder():
+        loop = asyncio.get_running_loop()
+        try:
+            from app.graph.embedder import _get_model
+            logger.info("Warming up sentence-transformers embedding model in background…")
+            await loop.run_in_executor(None, _get_model)
+            logger.info("Embedding model ready.")
+        except Exception as exc:
+            logger.warning("Embedding model warm-up failed: %s", exc)
 
-    yield  # ← application serves requests here
+    warmup_task = asyncio.create_task(_warmup_embedder())
 
+    yield  # ← application opens port and serves requests immediately here
+
+    if not warmup_task.done():
+        warmup_task.cancel()
     logger.info("Shutting down PharmaIntel AI API")
 
 
