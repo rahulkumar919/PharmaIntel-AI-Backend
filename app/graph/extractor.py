@@ -49,6 +49,13 @@ from typing import Tuple
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
 from pydantic import ValidationError
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+    before_sleep_log,
+)
 
 from app.config import get_settings
 from app.schemas.complaint import ComplaintExtraction
@@ -304,19 +311,33 @@ def _invoke_structured(structured_llm, messages: list, attempt: int) -> dict:
     """
     Call the structured LLM and return the raw include_raw dict.
 
+    Retries up to 3 times on rate-limit or transient network errors using
+    exponential back-off (1s, 2s, 4s).  Each retry is logged so the
+    production log drain shows exactly why a call was retried.
+
     Catches network/API errors and re-raises them as ExtractionError so the
     node doesn't need to handle Groq-specific exception types.
-    We deliberately do NOT retry network errors here — that's the job of a
-    separate tenacity retry decorator at the application boundary (added in
-    Phase 5 around the full graph invocation).
     """
-    try:
+    import httpx  # local import — only needed when network errors occur
+
+    @retry(
+        retry=retry_if_exception_type((Exception,)),
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=10),
+        before_sleep=before_sleep_log(logger, logging.WARNING),
+        reraise=True,
+    )
+    def _call_with_retry():
         return structured_llm.invoke(messages)
+
+    try:
+        return _call_with_retry()
     except Exception as exc:
         # Re-raise with context so the caller can distinguish LLM errors from
         # parse errors.
         raise ExtractionError(
-            f"LLM call failed on attempt {attempt}: {type(exc).__name__}: {exc}"
+            f"LLM call failed on attempt {attempt} after retries: "
+            f"{type(exc).__name__}: {exc}"
         ) from exc
 
 

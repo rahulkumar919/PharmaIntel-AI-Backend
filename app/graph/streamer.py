@@ -241,17 +241,34 @@ async def stream_graph_events(
     # Start the graph in a thread-pool worker (non-blocking for the event loop)
     executor_future = loop.run_in_executor(None, _run_graph)
 
-    # ── Consumer: yield frames from the queue to the SSE response ────────────
+    # ── Consumer: yield frames from the queue to the SSE response ──────────────
     try:
         while True:
-            item = await queue.get()
+            # 120s per-item timeout: if the graph hasn't produced any output in
+            # 2 minutes, something is stuck (OOM, Groq timeout, deadlock).
+            # This surfaces the problem as a visible SSE error frame instead of
+            # a silent hang that Render kills with no log output.
+            try:
+                item = await asyncio.wait_for(queue.get(), timeout=120.0)
+            except asyncio.TimeoutError:
+                logger.error(
+                    "SSE stream timed out waiting for graph output for session %s "
+                    "(no event in 120s — possible OOM or stuck LLM call)",
+                    session_id,
+                )
+                yield _error_frame(
+                    "Processing timed out. The server may be under memory pressure. "
+                    "Please retry your request."
+                )
+                break
             if item is _SENTINEL:
                 break
             yield item  # type: ignore[misc]
     finally:
         # Make sure the executor task is awaited even if the client disconnects
         # early — prevents "coroutine was never awaited" warnings.
+        # Allow up to 120s for a running LLM call to finish before giving up.
         try:
-            await asyncio.wait_for(executor_future, timeout=5.0)
+            await asyncio.wait_for(executor_future, timeout=120.0)
         except (asyncio.TimeoutError, Exception):
             pass

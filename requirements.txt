@@ -24,11 +24,13 @@ langgraph==0.3.34                # StateGraph, interrupt (Phase 3) — 0.3.x ser
 pypdf==5.6.0                     # PDF text extraction (PyPDFLoader uses this)
 docx2txt==0.8                    # DOCX text extraction (Docx2txtLoader uses this)
 
-# ── Embeddings (local, no extra API key needed) ──────────────────────────────
-sentence-transformers==3.4.1
-# torch: intentionally unpinned — pip resolves the correct CPU wheel.
-# Python 3.13 requires torch>=2.6.0.
-torch>=2.6.0
+# ── Embeddings (HuggingFace Inference API — no local PyTorch needed) ─────────
+# We call the free HF Inference API for all-MiniLM-L6-v2 embeddings instead of
+# loading the model locally with sentence-transformers.  This removes ~300-400 MB
+# of PyTorch RAM from the server process, making the app viable on Render free tier.
+# Get a free token at https://huggingface.co (Settings → Access Tokens).
+# Add HF_API_TOKEN to your Render environment variables.
+# httpx (already listed below) is used for the API calls.
 
 # ── Database ─────────────────────────────────────────────────────────────────
 sqlalchemy==2.0.41
