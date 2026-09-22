@@ -130,12 +130,11 @@ def classify_risk(extraction: ComplaintExtraction) -> RiskOutput:
         api_key=settings.groq_api_key,
         model=settings.extraction_model,
         temperature=0,          # deterministic — same input must yield same severity
-        max_tokens=256,
+        max_tokens=1024,
     )
 
     structured_llm = llm.with_structured_output(
         RiskOutput,
-        method="json_mode",
         include_raw=True,
     )
 

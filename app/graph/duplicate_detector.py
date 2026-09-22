@@ -59,8 +59,11 @@ def find_duplicates(description: str) -> tuple[list[UUID], list[float]]:
         return [], []
 
     try:
-        # Generate the embedding synchronously (sentence-transformers is sync)
+        # Generate the embedding synchronously
         embedding = embed_text(description)
+        if not embedding or all(abs(v) < 1e-6 for v in embedding):
+            logger.info("find_duplicates: embedding is empty or zero vector — skipping duplicate search")
+            return [], []
 
         # Run the async DB query via the event loop
         loop = asyncio.get_event_loop()
@@ -93,6 +96,7 @@ async def _query_db(
       LIMIT 5 caps results; in practice the threshold filter usually reduces
       this to 0-2 matches.
     """
+    import math
     settings = get_settings()
     threshold = settings.duplicate_similarity_threshold
 
@@ -117,8 +121,17 @@ async def _query_db(
         )
         rows = result.fetchall()
 
-    ids: list[UUID] = [UUID(str(row[0])) for row in rows]
-    scores: list[float] = [float(row[1]) for row in rows]
+    ids: list[UUID] = []
+    scores: list[float] = []
+    for row in rows:
+        try:
+            score = float(row[1])
+            # Guard against NaN/Inf which breaks JSON serialization (RFC 7159)
+            if not math.isnan(score) and not math.isinf(score):
+                ids.append(UUID(str(row[0])))
+                scores.append(round(score, 4))
+        except (ValueError, TypeError):
+            continue
 
     if ids:
         logger.info(

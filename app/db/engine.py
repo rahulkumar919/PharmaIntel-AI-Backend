@@ -77,6 +77,12 @@ async def get_db() -> AsyncGenerator:
 
     try:
         _, factory = _init()
+    except Exception as exc:
+        _log.warning("Database unavailable (%s) — using fallback ledger", exc)
+        yield None
+        return
+
+    try:
         async with factory() as session:
             try:
                 yield session
@@ -84,11 +90,9 @@ async def get_db() -> AsyncGenerator:
             except Exception:
                 await session.rollback()
                 raise
-            finally:
-                await session.close()
     except Exception as exc:
-        _log.warning("Database unavailable (%s) — using fallback ledger", exc)
-        yield None
+        _log.warning("Database session failed (%s) — route handled or rolling back", exc)
+        raise
 
 
 def get_async_session_factory():

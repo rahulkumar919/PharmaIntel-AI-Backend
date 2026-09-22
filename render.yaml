@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: pharmaintel-ai-backend
+    env: python
+    region: oregon
+    plan: free
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: GROQ_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        sync: false
+      - key: HF_API_TOKEN
+        sync: false
+      - key: CORS_ORIGINS
+        value: '["https://pharma-intel-ai-one.vercel.app","http://localhost:5173","http://localhost:3000"]'
+      - key: DUPLICATE_SIMILARITY_THRESHOLD
+        value: "0.85"
+      - key: COMPLETENESS_THRESHOLD
+        value: "0.4"

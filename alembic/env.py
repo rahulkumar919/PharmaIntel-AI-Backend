@@ -38,7 +38,15 @@ config = context.config
 
 # Inject the real DB URL from our Settings (overrides the empty placeholder in alembic.ini)
 settings = get_settings()
-config.set_main_option("sqlalchemy.url", settings.database_url)
+raw_url = settings.database_url
+clean_url = raw_url
+if clean_url.startswith("postgresql://"):
+    clean_url = clean_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+elif clean_url.startswith("postgres://"):
+    clean_url = clean_url.replace("postgres://", "postgresql+asyncpg://", 1)
+import re
+clean_url = re.sub(r'\?.*$', '', clean_url)
+config.set_main_option("sqlalchemy.url", clean_url)
 
 # Python logging setup from alembic.ini
 if config.config_file_name is not None:
@@ -75,10 +83,15 @@ async def run_async_migrations() -> None:
     Run migrations online using the async engine.
     run_sync() bridges the async engine to Alembic's synchronous migration API.
     """
+    connect_args = {}
+    if "neon.tech" in raw_url or "ssl" in raw_url:
+        connect_args["ssl"] = True
+
     connectable = async_engine_from_config(
         config.get_section(config.config_ini_section, {}),
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,    # NullPool: no connection pooling during migrations
+        connect_args=connect_args,
     )
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)

@@ -34,3 +34,6 @@ feature_*.txt
 
 # sentence-transformers model cache (~80 MB download on first run)
 .cache/
+
+# Local database ledger fallback
+data/
